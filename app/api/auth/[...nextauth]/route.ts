@@ -1,23 +1,15 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import NextAuth from "next-auth";
-import EmailProvider from "next-auth/providers/email";
-import { MongoDBAdapter } from "@next-auth/mongodb-adapter";
-import clientPromise from "../../../../lib/mongodb";
+// NextAuth has been removed from this project and replaced with Clerk.
+// This route remains as a harmless stub to avoid build-time module resolution
+// errors from previous builds. If you want to re-enable auth routes, replace
+// this stub with your Clerk-backed API or remove the file and implement your
+// auth endpoints elsewhere.
 
-export const authOptions = {
-  providers: [
-    EmailProvider({
-      server: process.env.SMTP_SERVER,
-      from: process.env.SMTP_USER,
-    }),
-  ],
-  adapter: MongoDBAdapter(clientPromise as any),
-  secret: process.env.NEXTAUTH_SECRET,
-  session: {
-    strategy: "jwt",
-  },
-};
+import type { NextRequest } from 'next/server';
 
-const handler = NextAuth(authOptions as any);
+export async function GET(_req: NextRequest) {
+  return new Response('Not Found', { status: 404 });
+}
 
-export { handler as GET, handler as POST };
+export async function POST(_req: NextRequest) {
+  return new Response('Not Found', { status: 404 });
+}

@@ -101,28 +101,29 @@ Return full file contents.
 Prompt 7 — Add authentication with Clerk (optional)
 ----------------------------------------------------------------
 Context:
-I want optional authentication using NextAuth.js with email/passwordless (email link) and a MongoDB adapter. Use TypeScript types, secure env var names, and suggest where to place SMTP config for production. Provide minimal sign-in and session examples.
+I want optional authentication using Clerk for client and server flows. Use TypeScript types, secure env var names, and suggest how to wire Clerk into both web and Electron contexts. Provide minimal sign-in and session examples and an option for server-side session checks.
 
 Instruction:
 Create:
-- Clerk integration using `@clerk/nextjs` and server-side helpers as needed.
-- Add `proxy.ts` (middleware-style) to handle auth checks and request rewrites for protected API routes.
-- Example env variables in .env.local.example for `NEXT_PUBLIC_CLERK_FRONTEND_API` and `CLERK_API_KEY`.
-- A simple client React component `components/AuthButton.tsx` that shows sign-in/sign-out using Clerk's components.
+- Clerk integration using `@clerk/nextjs` for the client and `@clerk/nextjs/server` for server helpers where appropriate.
+- Add `proxy.ts` (middleware-style) to handle auth checks and request rewrites for protected API routes (this will be used like middleware to verify Clerk sessions for server routes).
+- Example env variables in `.env.local.example` for `NEXT_PUBLIC_CLERK_FRONTEND_API` and `CLERK_API_KEY` and notes about Clerk secrets in Electron.
+- A simple client React component `components/AuthButton.tsx` that shows sign-in/sign-out using Clerk's components (`SignInButton` / `SignOutButton` / `UserButton`).
+- A small server helper `lib/auth.ts` placeholder that demonstrates how to verify Clerk sessions server-side (returns null by default; commented example showing how to call Clerk server helpers).
 Return all file contents and a brief note in README for setting Clerk environment variables and using Clerk with Electron.
 
 ----------------------------------------------------------------
-Prompt 8 — Add NextAuth + PWA session handling guidance
+Prompt 8 — Add Clerk + PWA session handling guidance
 ----------------------------------------------------------------
 Context:
-When offline, the PWA should still show cached pages but restrict protected API use. Provide a small strategy note and small code snippet protecting client-side routes, and how to handle token refresh or show offline notice in the UI.
+When offline, the PWA should still show cached pages but restrict protected API use. Provide a small strategy note and a small code snippet protecting client-side routes, and how to handle session checks and show an offline notice in the UI when Clerk session verification isn't possible.
 
 Instruction:
-Return a short TypeScript snippet for a client hook useAuth.tsx that:
-- Uses next-auth/react useSession.
-- Exposes isAuthenticated boolean.
-- Shows how to gate actions when navigator.onLine is false.
-Also return a README snippet explaining best practices for offline + auth in PWAs.
+Return a short TypeScript snippet for a client hook `useAuth.tsx` that:
+- Uses Clerk's client hooks (for example `useUser` or `useAuth` from `@clerk/nextjs`).
+- Exposes `isAuthenticated` boolean and `user` data.
+- Shows how to gate actions when `navigator.onLine` is false and how to present an offline notice in the UI.
+Also return a README snippet explaining best practices for offline + auth in PWAs when using Clerk (cache-only UI views, disable protected API calls, show re-auth prompts when reconnecting).
 
 ----------------------------------------------------------------
 Prompt 9 — Add linting, formatting, and pre-commit hooks
@@ -169,13 +170,14 @@ Return file contents.
 Prompt 12 — Add deployment README checklist and HostPinnacle notes
 ----------------------------------------------------------------
 Context:
-I will likely host the web on Vercel and keep HostPinnacle for email and domain. Provide a deployment checklist covering Vercel, environment variables (MONGODB_URI, NEXTAUTH_URL, NEXTAUTH_SECRET), DNS entries for PWA and Electron deep links, and notes for packaging desktop builds for Windows and macOS.
+I will likely host the web on Vercel and keep HostPinnacle for email and domain. Provide a deployment checklist covering Vercel, environment variables (MONGODB_URI and Clerk variables), DNS entries for PWA and Electron deep links, and notes for packaging desktop builds for Windows and macOS.
 
 Instruction:
 Create a DEPLOYMENT.md file containing:
 - Steps to deploy to Vercel including environment variables and build commands.
 - How to configure DNS and SSL if using HostPinnacle (general steps).
 - How to distribute electron builds and sign on macOS (high-level).
+- Replace any references to NEXTAUTH_* with Clerk env var guidance (NEXT_PUBLIC_CLERK_FRONTEND_API, CLERK_API_KEY) and mention any Electron-exposed considerations for Clerk API keys.
 Return the file content.
 
 ----------------------------------------------------------------
@@ -201,4 +203,4 @@ Append a short checklist with commands to run locally for dev and build:
 - npm run start
 - npm run electron:dev
 - npm run electron:build
-Also add a reminder to fill .env.local and never commit secrets.
+Also add a reminder to fill .env.local and never commit secrets. Replace any mention of NEXTAUTH_* environment variables with Clerk variables: `NEXT_PUBLIC_CLERK_FRONTEND_API` and `CLERK_API_KEY` (note: only the frontend API is public; keep server keys secret).

@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { UserButton, useUser, SignInButton, SignOutButton } from '@clerk/nextjs';
 
@@ -8,8 +8,10 @@ export default function AuthButton() {
   if (isSignedIn) {
     return (
       <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-        <UserButton userProfile={true} />
-        <span>{user?.primaryEmailAddress?.emailAddress ?? user?.emailAddresses?.[0]?.emailAddress}</span>
+        <UserButton />
+        <span>
+          {user?.primaryEmailAddress?.emailAddress ?? user?.emailAddresses?.[0]?.emailAddress}
+        </span>
         <SignOutButton />
       </div>
     );
