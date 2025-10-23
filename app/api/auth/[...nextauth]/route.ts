@@ -4,12 +4,10 @@
 // this stub with your Clerk-backed API or remove the file and implement your
 // auth endpoints elsewhere.
 
-import type { NextRequest } from 'next/server';
-
-export async function GET(_req: NextRequest) {
+export async function GET() {
   return new Response('Not Found', { status: 404 });
 }
 
-export async function POST(_req: NextRequest) {
+export async function POST() {
   return new Response('Not Found', { status: 404 });
 }

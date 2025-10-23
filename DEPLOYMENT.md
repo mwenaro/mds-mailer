@@ -1,3 +1,44 @@
+# Deployment and PWA/Auth Guidance
+
+This project uses Next.js (App Router), Clerk for authentication, and TailwindCSS. Below are notes for deploying to Vercel (recommended) and additional guidance for PWA offline behavior and Clerk integration.
+
+## Vercel
+
+- Create a new Vercel project from your GitHub repo. Vercel auto-detects Next.js apps.
+- Environment variables to set in Vercel:
+  - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
+  - `CLERK_SECRET_KEY`
+  - Any DB connection strings (e.g. `MONGODB_URI`) if you replace the demo store.
+- Build command: `npm run build`
+- Output: Vercel handles the output automatically for Next.js.
+
+## Other Hosts
+
+- For other Node hosts, build with `npm run build` and run `npm start` or use a process manager.
+- Ensure environment variables from above are set.
+
+## PWA / Service Worker
+
+- A basic service worker registration helper is included (`components/RegisterSWClient.tsx`).
+- For offline-first experiences make sure you:
+  - Cache static assets (images, CSS, JS) and basic routes.
+  - Keep API calls resilient and fallback to cached responses or show friendly offline UI.
+
+## Clerk Integration Notes
+
+- Clerk requires the publishable key on the client and the secret key on the server.
+- Protect API routes by validating sessions server-side (use the existing `lib/auth.ts` helper and `proxy.ts` requireClerkSession).
+- For local development add keys to `.env.local`:
+
+```
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
+CLERK_SECRET_KEY=sk_test_...
+```
+
+## Troubleshooting
+
+- If builds fail due to stale `.next` cache after changing server auth libraries, delete `.next` and rebuild.
+- When migrating auth providers, ensure you remove old server routes referencing the previous provider to avoid module-not-found errors.
 # Deployment checklist
 
 This file contains steps and notes for deploying the web app (Next.js) and packaging the Electron desktop builds.
