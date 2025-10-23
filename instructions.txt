@@ -1,0 +1,204 @@
+GitHub Copilot Prompts for Next.js 16 + Electron + PWA Project
+================================================================
+
+How to use:
+------------
+1. Open VS Code with GitHub Copilot or Copilot Chat.
+2. Create an empty folder and open it in VS Code.
+3. Paste each prompt into Copilot Chat in sequence.
+4. Review generated code, run commands shown, and commit to GitHub.
+
+----------------------------------------------------------------
+Prompt 1 — Scaffold Next.js 16 starter with TypeScript
+----------------------------------------------------------------
+Context:
+I want a Next.js 16 project scaffold using TypeScript, Tailwind CSS, and basic folder structure. I will use this app as the base for a PWA and an Electron wrapper. Keep the structure opinionated: pages/app router support, components/, lib/, api/ (for server code), styles/, public/icons. Provide package.json scripts for dev, build, start, lint, and format.
+
+Instruction:
+Generate the full set of files needed to scaffold a Next.js 16 TypeScript app:
+- package.json with scripts: dev, build, start, lint, format, prepare.
+- tsconfig.json configured for Next 16 app router.
+- next.config.js minimal config.
+- tailwind.config.cjs and postcss.config.cjs.
+- app/page.tsx with simple homepage component.
+- components/Header.tsx and Footer.tsx.
+- styles/globals.css with Tailwind base imports.
+- public/icons placeholder path.
+- README.md with commands to run dev and build.
+Output file contents only, with full code blocks for each file and file paths as comments above each block.
+
+----------------------------------------------------------------
+Prompt 2 — Add PWA (next-pwa) config and manifest
+----------------------------------------------------------------
+Context:
+Project scaffold exists. I want PWA support with next-pwa plugin configured for production builds, service worker registration, and a manifest.json in public. The PWA should be disabled in development. Use Next.js 16-specific configuration. Provide icons paths and a simple service worker registration snippet that runs on client.
+
+Instruction:
+Add/modify the following:
+- Install instructions: list the npm install command for next-pwa and workbox (if needed).
+- Update next.config.js to integrate next-pwa and disable in development.
+- public/manifest.json with name, short_name, start_url, display standalone, theme and background colors, and two icons.
+- public/icons/icon-192.png and icon-512.png placeholders (just file paths).
+- app/layout.tsx: include link to manifest and meta tags for theme-color.
+- Create a client-side registration file at lib/registerServiceWorker.tsx that registers the service worker only in production and browser.
+Provide file contents and any code to add into app/layout.tsx. Also include a test command to build and serve to verify PWA behavior.
+
+----------------------------------------------------------------
+Prompt 3 — Add offline caching strategies (workbox) and runtime caching
+----------------------------------------------------------------
+Context:
+I need a PWA that caches assets and API responses intelligently. Use runtime caching rules for images and API JSON endpoints with network-first fallback for API and stale-while-revalidate for images. Integrate these rules into next-pwa config in next.config.js. Use sensible cache names and maxEntries.
+
+Instruction:
+Update next.config.js with a runtimeCaching array implementing:
+- StaleWhileRevalidate strategy for image URLs (/_next/static/, /images/, https://...cdn).
+- NetworkFirst strategy for API routes under /api/.
+- Provide example cache names, maxEntries=60 for images, maxEntries=30 for API, and maxAgeSeconds values.
+Return the updated next.config.js file.
+
+----------------------------------------------------------------
+Prompt 4 — Add Electron wrapper and dev script
+----------------------------------------------------------------
+Context:
+I want an Electron wrapper that launches the Next.js dev server in dev and loads the app URL. Use a minimal secure BrowserWindow configuration and disable nodeIntegration. Provide a development script that runs Next dev, waits for localhost:3000, then launches Electron. Also include electron-builder config in package.json for packaging.
+
+Instruction:
+Create the following:
+- main/electron-main.ts (TypeScript) containing Electron app lifecycle, createWindow, loading http://localhost:3000 in dev, and file:// path for production build.
+- Add npm dev script "electron:dev" that runs concurrently: next dev + wait-on + electron .
+- Add build config in package.json for electron-builder: appId, productName, directories, files, and multi-platform targets (win, mac, linux).
+- Add instructions in README for running electron:dev and building the desktop app.
+Provide the full contents of electron-main.ts and the package.json additions.
+
+----------------------------------------------------------------
+Prompt 5 — Add production Electron serving static Next build
+----------------------------------------------------------------
+Context:
+After building Next (next build && next export or next start), in production Electron should load the app from a local static server or a packaged build. Create a robust main process that uses an environment variable to decide whether to load a local URL (process.env.ELECTRON_START_URL) or load a file from a packaged build directory. Also add a small express static server script that serves the .next or exported static files when packaging.
+
+Instruction:
+Provide:
+- Updated main/electron-main.ts with logic to use process.env.ELECTRON_START_URL or serve local file://.
+- A new scripts/serve-static.js (small Express server) that serves the Next production output from .next or out/ depending on chosen deployment path.
+- package.json script "electron:build" that first runs next build, next export if necessary, then electron-builder.
+Return file contents for electron-main.ts and serve-static.js and the package.json script entry.
+
+----------------------------------------------------------------
+Prompt 6 — Add API route example with MongoDB (MERN backend)
+----------------------------------------------------------------
+Context:
+I plan to use MongoDB Atlas. Add a simple Next.js API route that connects to MongoDB using a reusable lib/mongodb.ts connection util that caches the connection in globalThis to avoid reconnects in dev. Provide a /api/todos route with GET and POST to read/write a todos collection. Use TypeScript and environment variables for MONGODB_URI and DB_NAME.
+
+Instruction:
+Generate:
+- lib/mongodb.ts: connection util using MongoClient, caching on globalThis.
+- models/todo.ts (if necessary) or TS types.
+- pages/api/todos/route.ts or app/api/todos/route.ts (whichever fits app router) implementing GET (list) and POST (create).
+- Example .env.local.example with MONGODB_URI and DB_NAME fields.
+Return full file contents.
+
+----------------------------------------------------------------
+Prompt 7 — Add authentication with Clerk (optional)
+----------------------------------------------------------------
+Context:
+I want optional authentication using NextAuth.js with email/passwordless (email link) and a MongoDB adapter. Use TypeScript types, secure env var names, and suggest where to place SMTP config for production. Provide minimal sign-in and session examples.
+
+Instruction:
+Create:
+- Clerk integration using `@clerk/nextjs` and server-side helpers as needed.
+- Add `proxy.ts` (middleware-style) to handle auth checks and request rewrites for protected API routes.
+- Example env variables in .env.local.example for `NEXT_PUBLIC_CLERK_FRONTEND_API` and `CLERK_API_KEY`.
+- A simple client React component `components/AuthButton.tsx` that shows sign-in/sign-out using Clerk's components.
+Return all file contents and a brief note in README for setting Clerk environment variables and using Clerk with Electron.
+
+----------------------------------------------------------------
+Prompt 8 — Add NextAuth + PWA session handling guidance
+----------------------------------------------------------------
+Context:
+When offline, the PWA should still show cached pages but restrict protected API use. Provide a small strategy note and small code snippet protecting client-side routes, and how to handle token refresh or show offline notice in the UI.
+
+Instruction:
+Return a short TypeScript snippet for a client hook useAuth.tsx that:
+- Uses next-auth/react useSession.
+- Exposes isAuthenticated boolean.
+- Shows how to gate actions when navigator.onLine is false.
+Also return a README snippet explaining best practices for offline + auth in PWAs.
+
+----------------------------------------------------------------
+Prompt 9 — Add linting, formatting, and pre-commit hooks
+----------------------------------------------------------------
+Context:
+Add ESLint, Prettier, and Husky pre-commit hooks to run lint and tests before commit, plus a sample .eslintrc and .prettierrc. Use recommended Next + TypeScript ESLint config.
+
+Instruction:
+Provide:
+- package.json devDependencies to install (eslint, prettier, husky, lint-staged).
+- .eslintrc.json configured for Next.js TypeScript.
+- .prettierrc.
+- Set up husky pre-commit hook in package.json or a husky script to run lint-staged on staged files.
+Return full configs and example package.json entries.
+
+----------------------------------------------------------------
+Prompt 10 — Add Dockerfile for web and Docker for electron-build (CI)
+----------------------------------------------------------------
+Context:
+I want a Dockerfile for building and running the Next.js app in production and a separate Dockerfile or CI snippet that builds the electron artifacts using electron-builder within CI (GitHub Actions). Provide lightweight multi-stage Dockerfile for Next production.
+
+Instruction:
+Create:
+- Dockerfile (multi-stage) that installs deps, builds Next, and uses a minimal Node base to run `next start`.
+- docker-compose.yml example that runs the app plus a MongoDB (local dev) service.
+- A short GitHub Actions workflow .github/workflows/ci.yml snippet that runs tests, builds the Next app, and runs electron-builder to produce artifacts (use ubuntu-latest, setup-node, caches, and actions to upload artifacts).
+Return full files and commands.
+
+----------------------------------------------------------------
+Prompt 11 — Add tests and sample test for a component
+----------------------------------------------------------------
+Context:
+Add Jest and React Testing Library config and a simple test for Header component. Include scripts: test, test:watch, test:coverage.
+
+Instruction:
+Provide:
+- jest.config.ts or jest.config.cjs for Next + TS.
+- setupTests.ts for RTL.
+- Example unit test __tests__/Header.test.tsx.
+- package.json scripts additions.
+Return file contents.
+
+----------------------------------------------------------------
+Prompt 12 — Add deployment README checklist and HostPinnacle notes
+----------------------------------------------------------------
+Context:
+I will likely host the web on Vercel and keep HostPinnacle for email and domain. Provide a deployment checklist covering Vercel, environment variables (MONGODB_URI, NEXTAUTH_URL, NEXTAUTH_SECRET), DNS entries for PWA and Electron deep links, and notes for packaging desktop builds for Windows and macOS.
+
+Instruction:
+Create a DEPLOYMENT.md file containing:
+- Steps to deploy to Vercel including environment variables and build commands.
+- How to configure DNS and SSL if using HostPinnacle (general steps).
+- How to distribute electron builds and sign on macOS (high-level).
+Return the file content.
+
+----------------------------------------------------------------
+Prompt 13 — One-line Copilot helper prompts for small tasks
+----------------------------------------------------------------
+Context:
+I want a short list of one-line prompts I can paste to Copilot for quick tasks like: create a Tailwind-styled card component, add a settings page with offline sync, implement client-side image caching hook, add offline notification UI, and create a basic CRUD UI for todos using the API.
+
+Instruction:
+Return 8-10 one-line prompts optimized for Copilot, each prefixed with a short label. Keep them succinct and action-oriented.
+
+----------------------------------------------------------------
+Final note (paste this at the end of your Copilot session)
+----------------------------------------------------------------
+Context:
+The user wants TypeScript everywhere, clear env variable examples, and simple local dev commands. Keep security best practices in mind (no hard-coded secrets).
+
+Instruction:
+Append a short checklist with commands to run locally for dev and build:
+- npm install
+- npm run dev
+- npm run build
+- npm run start
+- npm run electron:dev
+- npm run electron:build
+Also add a reminder to fill .env.local and never commit secrets.
