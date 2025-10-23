@@ -1,3 +1,87 @@
+# MDS Mailer
+
+MDS Mailer is a small Next.js (App Router) application demonstrating mailbox management with Clerk authentication and MongoDB persistence. It includes a marketing landing page, registration UI, and a dashboard. The project contains tests and CI configuration.
+
+## Quick Start
+
+1. Install dependencies:
+
+```bash
+npm install
+```
+
+2. Create a `.env.local` in the project root with the following environment variables:
+
+```
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
+CLERK_SECRET_KEY=sk_test_...
+MONGODB_URI=mongodb://localhost:27017/mds-mailer
+MAILBOX_ENCRYPTION_KEY=<base64-32-bytes>
+```
+
+Generate a 32-bytes base64 key for `MAILBOX_ENCRYPTION_KEY`:
+
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+```
+
+3. Run locally:
+
+```bash
+npm run dev
+```
+
+4. Run tests:
+
+```bash
+npm test
+```
+
+## Project Structure
+
+- `app/` — Next.js App Router pages and API routes
+- `components/` — UI components (landing sections etc.)
+- `lib/` — server helpers:
+  - `auth.ts` — server-side Clerk session helper (dynamic import)
+  - `db.ts` — MongoDB connection helper (lazy connect)
+  - `store.ts` — mailbox persistence (MongoDB-backed)
+  - `crypto.ts` — encryption helper for mailbox credentials
+- `__tests__/` — Jest + React Testing Library tests
+- `.github/workflows/ci.yml` — CI pipeline (lint/build/tests)
+
+## Authentication (Clerk)
+
+This project uses Clerk for authentication. Set your Clerk keys in `.env.local`. The server-side helper `getServerAuthSession` is used in API routes to protect endpoints.
+
+Client-side components use `@clerk/nextjs` (e.g., `SignInButton`, `useUser`) for auth UI.
+
+## Mailbox Storage & Security
+
+- Mailbox credentials are stored encrypted using AES-256-GCM via `lib/crypto.ts`. Provide a `MAILBOX_ENCRYPTION_KEY` (32 bytes, base64) in your environment.
+- The API associates mailboxes with a `ownerId` (Clerk user id) and enforces server-side checks — only the authenticated user's mailboxes are returned.
+- Important security notes:
+  - Do not commit secrets. Use environment variables or a secrets manager for production.
+  - Consider using OAuth or delegated access to mail services instead of storing user passwords.
+  - Implement key rotation and re-encryption strategy for `MAILBOX_ENCRYPTION_KEY`.
+
+## Testing
+
+- Unit tests use Jest + React Testing Library. Server-side tests mock Clerk and storage to avoid external dependencies.
+- Tests are configured in `jest.config.ts`. A JSDOM environment is used for client tests and polyfills are added in `jest.setup.ts`.
+
+## CI / Deployment
+
+- GitHub Actions workflow `ci.yml` runs lint, build, and tests on pushes/PRs to `main`.
+- Recommended deployment: Vercel (auto-detects Next.js apps). Set the environment variables in Vercel's dashboard.
+
+## Next tasks / Improvements
+
+- Replace simplistic mailbox credential storage with delegated OAuth where possible.
+- Add proper key management and rotation for encryption keys.
+- Add integration tests using a test MongoDB instance (mongodb-memory-server) in CI.
+- Harden authorization checks and RBAC if supporting organizations or shared mailboxes.
+
+If you'd like, I can push these changes and create a release tag, or add integration tests next.
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started

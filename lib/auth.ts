@@ -46,11 +46,14 @@ export async function getServerAuthSession(req?: Request | unknown) {
       }
     } catch {
       // fallback to original req
-      requestLike = req;
+      requestLike = req as RequestLike;
     }
 
-    // Call getAuth with a plain object conforming to RequestLike.
-    const auth = getAuth(requestLike as unknown as RequestLike);
+  // Call getAuth. Clerk's RequestLike type is from the Clerk package; at runtime
+  // a plain object or Request works. Cast via any and keep this a single-line
+  // exception for the runtime call.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const auth = getAuth(requestLike as unknown as any);
     if (!auth || !auth.userId) return null;
     return {
       userId: auth.userId,
